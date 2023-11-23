@@ -2,10 +2,10 @@ import asyncpg
 
 class DataBase:
     def __init__(self): # данные для входа в базу
-        self.user = 'user_bot'
-        self.password = '123456'
-        self.database = 'bot_db'
-        self.host = 'localhost'
+        self.user = ''
+        self.password = ''
+        self.database = ''
+        self.host = ''
         self.port = 5432
 
     async def connect(self): # функция подключения к базе

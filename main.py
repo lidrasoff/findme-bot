@@ -21,7 +21,7 @@ async def main():
         admin_handler.router
     )
 
-    print('Ебу бота')
+    print('Стартуем')
     
     await base.create_table()
 
