@@ -2,10 +2,10 @@ import asyncpg
 
 class DataBase:
     def __init__(self): # данные для входа в базу
-        self.user = ''
-        self.password = ''
-        self.database = ''
-        self.host = ''
+        self.user = 'test_user'
+        self.password = 'qwerty123'
+        self.database = 'test_db'
+        self.host = 'localhost'
         self.port = 5432
 
     async def connect(self): # функция подключения к базе
@@ -28,40 +28,24 @@ class DataBase:
                 ticket_id SERIAL PRIMARY KEY,
                 user_id BIGINT NOT NULL,
                 username TEXT DEFAULT 'аноним',
-                media TEXT,
+                media TEXT[],
                 description TEXT NOT NULL,
                 status VARCHAR(25) DEFAULT 'Обработка',
-                type VARCHAR(25) NOT NULL,
-                video BOOLEAN NOT NULL DEFAULT FALSE
+                type VARCHAR(25) NOT NULL
             )
         ''')
         await self.disconnect()
 
     """СОЗДАНИЕ ТИКЕТОВ"""
 
-    async def create_ticket_media(self, data, query): # создание поста с медиа-файлом
+    async def create_ticket(self, data, username): # создание поста без медиа-файла
         await self.connect()
-        await self.conn.execute('INSERT INTO tickets (user_id, username, media, description, type, video) VALUES ($1,$2,$3,$4,$5,$6)', data['userid'], query.from_user.username, data['media'], data['description'], data['post_type'], data['video']) # запись полученных данных с машины состояний в БД
-        await self.disconnect()
-
-    async def create_ticket(self, data, query): # создание поста без медиа-файла
-        await self.connect()
-        await self.conn.execute('INSERT INTO tickets (user_id, username, description, type) VALUES ($1,$2,$3,$4)', data['userid'], query.from_user.username, data['description'], data['post_type']) # запись полученных данных с машины состояний в БД
-        await self.disconnect()
-
-    async def create_anon_media(self, data): # создание АНОНИМНОГО поста с медиа-файлом 
-        await self.connect()
-        await self.conn.execute('INSERT INTO tickets (user_id, media, description, type, video) VALUES ($1,$2,$3,$4,$5)', data['userid'], data['media'], data['description'], data['post_type'], data['video']) # запись полученных данных с машины состояний в БД
-        await self.disconnect()
-
-    async def create_anon(self, data): # создание АНОНИМНОГО поста без медиа-файла
-        await self.connect()
-        await self.conn.execute('INSERT INTO tickets (user_id, description, type) VALUES ($1,$2,$3)', data['userid'], data['description'], data['post_type']) # запись полученных данных с машины состояний в БД
+        await self.conn.execute('INSERT INTO tickets (user_id, username, media, description, type) VALUES ($1,$2,$3,$4,$5)', data['userid'], username, data['media'], data['description'], data['post_type']) # запись полученных данных с машины состояний в БД
         await self.disconnect()
 
     """ПОЛУЧЕНИЕ СПИСКА ТИКЕТОВ"""
 
-    async def get_tickets(self, message, status):
+    async def get_tickets(self, status):
         if status == 'pending': # проверка статуса объявлений, получаемого из функции get_pending(). Смотреть в admin_handler
             result = '' # создание пустой переменной необходимо, чтобы избмежать ошибку, если данных не будет
             await self.connect()
