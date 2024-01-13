@@ -26,6 +26,7 @@ def choose_type():
     builder.row(
         InlineKeyboardButton(text='📸 Найди меня', callback_data=Postination(action='naydi').pack()),
         InlineKeyboardButton(text='🔎 Потеряшка', callback_data=Postination(action='poteryashka').pack()),
+        InlineKeyboardButton(text='✏️ Без тега', callback_data=Postination(action='tagless').pack()),
         width=1
     )
     return builder.as_markup()

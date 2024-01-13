@@ -32,10 +32,13 @@ async def start(message: Message, state: FSMContext):
 @router.callback_query(client_kb.Postination.filter()) # лютая функция обработки колбэка клавиатуры
 async def choose_post(query: CallbackQuery, callback_data: client_kb.Postination, state: FSMContext):
     if callback_data.action == 'naydi':
-        action = 'найди_меня'
+        action = '#найди_меня'
     
     if callback_data.action == 'poteryashka':
-        action = 'потеряшка'
+        action = '#потеряшка'
+
+    if callback_data.action == 'tagless':
+        action = ''
     
     await state.update_data(
         userid=query.from_user.id,

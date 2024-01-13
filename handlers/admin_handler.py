@@ -59,7 +59,7 @@ async def select(message: Message, command: CommandObject, state: FSMContext):
             post_type=ticket['type']
         )
 
-        return await message.answer(f'{ticket["description"]}\n\nОтправитель: @{ticket["username"]}\n\n#{ticket["type"]}', reply_markup=admin_kb.confirmator())
+        return await message.answer(f'{ticket["description"]}\n\nОтправитель: @{ticket["username"]}\n\n{ticket["type"]}', reply_markup=admin_kb.confirmator())
 
     await state.update_data(
         ticket_id=ticketID,
@@ -72,7 +72,7 @@ async def select(message: Message, command: CommandObject, state: FSMContext):
     media_group = [InputMediaPhoto(media=file_id) for file_id in ticket['media']]
 
     await message.answer_media_group(media=media_group)
-    await message.answer(f'{ticket["description"]}\n\nОтправитель: @{ticket["username"]}\n\n#{ticket["type"]}', reply_markup=admin_kb.confirmator())
+    await message.answer(f'{ticket["description"]}\n\nОтправитель: @{ticket["username"]}\n\n{ticket["type"]}', reply_markup=admin_kb.confirmator())
 
 
 @router.callback_query(admin_kb.Confirmation.filter())
@@ -87,7 +87,7 @@ async def choose_ticket(query: CallbackQuery, callback_data: admin_kb.Confirmati
 
 
     if data['media'] == None:
-        await client.send_message(chat_id=channel, text=f'{data["description"]}\n\nОтправитель: @{data["username"]}\n\n#{data["post_type"]}')
+        await client.send_message(chat_id=channel, text=f'{data["description"]}\n\nОтправитель: @{data["username"]}\n\nВыложить объвление:\n— @FindMeKtits_bot\n\n{data["post_type"]}')
         await base.edit_ticket(ticketID=data['ticket_id'])
         await query.message.delete_reply_markup()
         await query.answer('✅ Опубликовано!')
@@ -95,11 +95,10 @@ async def choose_ticket(query: CallbackQuery, callback_data: admin_kb.Confirmati
     
 
     media_group = [InputMediaPhoto(media=file_id) for file_id in data['media']]
-    media_group[0] = InputMediaPhoto(media=data['media'][0], caption=f'{data["description"]}\n\nОтправитель: @{data["username"]}\n\n#{data["post_type"]}')
+    media_group[0] = InputMediaPhoto(media=data['media'][0], caption=f'{data["description"]}\n\nОтправитель: @{data["username"]}\n\nВыложить объвление:\n— @FindMeKtits_bot\n\n{data["post_type"]}')
 
     await client.send_media_group(chat_id=channel, media=media_group)
     await base.edit_ticket(ticketID=data['ticket_id'])
     await query.message.delete_reply_markup()
     await query.answer('✅ Опубликовано!')
     await state.clear()
-    
