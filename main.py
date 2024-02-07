@@ -29,14 +29,16 @@ async def main():
         BotCommand(command='start', description='Создать объявление'),
     ])
 
-    for developer in developers:
+    
+    list = await base.get_admins()
+    for admin in list:
         await client.set_my_commands(commands=[
             BotCommand(command='start', description='Создать объявление'),
             BotCommand(command='pending', description='Список обрабатываемых объявлений'),
             BotCommand(command='tickets', description='Список всех объявлений'),
             BotCommand(command='select', description='Выбрать объявление'),
             BotCommand(command='cancel', description='Отменить действие'),
-    ], scope=BotCommandScopeChat(chat_id=developer)) # установка доп списка команд модераторам. Смотреть config.py
+    ], scope=BotCommandScopeChat(chat_id=admin)) # установка доп списка команд модераторам. Смотреть config.py
 
     await client.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(client)

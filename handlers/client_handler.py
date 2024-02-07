@@ -13,13 +13,16 @@ base = database.DataBase()
 
 client = Bot(TOKEN, parse_mode='HTML')
 
-chat_members = ['LEFT', 'KICKED', 'RESTRICTED'] # массив статусов для проверки пользователя
+chat_members = ['LEFT', 'KICKED', 'RESTRICTED', 'BANNED'] # массив статусов для проверки пользователя
 
 router = Router()
 
 @router.message(Command('start'))
 async def start(message: Message, state: FSMContext):
     check_member = await client.get_chat_member(chat_id=channel, user_id=message.from_user.id)
+
+    if str(check_member.status).split('.')[-1] == "KICKED":
+        return
 
     if str(check_member.status).split('.')[-1] in chat_members:
         return await message.answer('Вы не подписаны на канал❗\n\nДля того чтобы оставить объявление, необходимо быть подписанным на <a href="https://t.me/NaidiMeniaMckKtits">канал</a>.')
@@ -31,11 +34,25 @@ async def start(message: Message, state: FSMContext):
 @router.message(formClient.ptype)
 @router.callback_query(client_kb.Postination.filter()) # лютая функция обработки колбэка клавиатуры
 async def choose_post(query: CallbackQuery, callback_data: client_kb.Postination, state: FSMContext):
-    if callback_data.action == 'naydi':
+    if callback_data.action == "valentine":
+        action = "#валентин"
+        await query.message.delete_reply_markup()
+        await query.message.edit_text("<b>Какое место для вас наилучшее, чтобы отпраздновать день всех влюбленных</b>")
+        await state.update_data(
+            userid=query.from_user.id,
+            post_type=action,
+            media=[]
+        )
+        await query.answer()
+        await state.set_state(formClient.array)
+        return
+
+    if callback_data.action == 'find':
         action = '#найди_меня'
     
-    if callback_data.action == 'poteryashka':
+    if callback_data.action == 'lost':
         action = '#потеряшка'
+
 
     if callback_data.action == 'tagless':
         action = ''
@@ -56,6 +73,12 @@ async def form_name(message: Message, state: FSMContext):
 
     data = await state.get_data()
     photos = data['media']
+
+    if data['post_type'] == "#валентин":
+        await base.add_valentine(data['userid'], message.text)
+        await state.clear()
+        return await message.answer("нихуя нихуя. валя пошел")
+        
 
     if photos and message.text:
         await state.update_data(
@@ -102,8 +125,9 @@ async def choose_anon(query: CallbackQuery, callback_data: client_kb.Anonimation
         await query.message.delete_reply_markup()
         await query.message.edit_text(succes_message)
         await query.answer()
-        for developer in developers:
-            await client.send_message(chat_id=developer, text=notify_message)
+        list = await base.get_admins()
+        for admin_id in list:
+            await client.send_message(chat_id=admin_id, text=notify_message)
         return await state.clear()
     
     if not query.from_user.username:
@@ -116,6 +140,7 @@ async def choose_anon(query: CallbackQuery, callback_data: client_kb.Anonimation
     await query.message.delete_reply_markup()
     await query.message.edit_text(succes_message)
     await query.answer()
-    for developer in developers:
-        await client.send_message(chat_id=developer, text=notify_message)
+    list = await base.get_admins()
+    for admin_id in list:
+        await client.send_message(chat_id=admin_id, text=notify_message)
     await state.clear()

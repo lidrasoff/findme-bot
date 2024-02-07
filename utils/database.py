@@ -2,9 +2,9 @@ import asyncpg
 
 class DataBase:
     def __init__(self): # данные для входа в базу
-        self.user = 'test_user'
-        self.password = 'qwerty123'
-        self.database = 'test_db'
+        self.user = 'postgres'
+        self.password = '123123'
+        self.database = 'findme'
         self.host = 'localhost'
         self.port = 5432
 
@@ -32,6 +32,16 @@ class DataBase:
                 description TEXT NOT NULL,
                 status VARCHAR(25) DEFAULT 'Обработка',
                 type VARCHAR(25) NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS admins (
+                id SERIAL PRIMARY KEY,
+                admin_id BIGINT NOT NULL,
+                level SMALLINT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS valentine_day (
+                id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                text TEXT NOT NULL
             )
         ''')
         await self.disconnect()
@@ -84,4 +94,54 @@ class DataBase:
     async def remove_ticket(self, ticketID): # функция удаления поста
         await self.connect()
         await self.conn.execute('DELETE FROM tickets WHERE ticket_id = $1', ticketID) # удаляем пост из БД по его ticket_id
+        await self.disconnect()
+
+    async def remove_all_tickets(self, userid):
+        await self.connect()
+        await self.conn.execute("DELETE FROM tickets WHERE user_id = $1", userid)
+        await self.disconnect()
+
+    """РАБОТА СО СПИСКОМ ОДМЕНОВ"""
+
+    async def get_admins(self):
+        await self.connect()
+        records = await self.conn.fetch('SELECT admin_id FROM admins')
+        result = [record['admin_id'] for record in records]
+        await self.disconnect()
+        return result
+    
+    async def check_admin(self,userid):
+        truenot = False
+        await self.connect()
+        result = await self.conn.fetch('SELECT * FROM admins WHERE admin_id = $1', userid)
+        await self.disconnect()
+        if result is not None:
+            truenot = True
+            return truenot
+        else:
+            truenot = False
+            return truenot
+        
+
+    async def get_level(self, userid):
+        await self.connect()
+        records = await self.conn.fetch("SELECT level FROM admins WHERE admin_id = $1", userid)
+        result = [record['level'] for record in records]
+        await self.disconnect()
+        return result
+    
+    async def add_admin(self, userid, lvl):
+        await self.connect()
+        await self.conn.execute("INSERT INTO admins (admin_id, level) VALUES ($1, $2)", userid, lvl)
+        await self.disconnect()
+    
+    async def del_admin(self, userid):
+        await self.connect()
+        await self.conn.execute("DELETE FROM admins WHERE admin_id = $1", userid)
+        await self.disconnect()
+
+    """ПРАЗДНИК. СОЗДАНИЕ ВАЛЕНТИНА"""
+    async def add_valentine(self, userid, text):
+        await self.connect()
+        await self.conn.execute("INSERT INTO valentine_day (user_id, text) VALUES ($1, $2)", userid, text)
         await self.disconnect()

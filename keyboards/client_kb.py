@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram.filters.callback_data import CallbackData
+from config import active_14
 
 
 class Anonimation(CallbackData, prefix='ano'): # создание класса для обработки колбэка инлайн-кнопок
@@ -23,10 +24,21 @@ class Postination(CallbackData, prefix='post'):
 
 def choose_type():
     builder = InlineKeyboardBuilder()
-    builder.row(
-        InlineKeyboardButton(text='📸 Найди меня', callback_data=Postination(action='naydi').pack()),
-        InlineKeyboardButton(text='🔎 Потеряшка', callback_data=Postination(action='poteryashka').pack()),
-        InlineKeyboardButton(text='✏️ Без тега', callback_data=Postination(action='tagless').pack()),
-        width=1
-    )
+    if active_14 == True:
+        builder.row(
+            InlineKeyboardButton(text='💘 14 Февраля', callback_data=Postination(action='valentine').pack()),
+            InlineKeyboardButton(text='📸 Найди меня', callback_data=Postination(action='find').pack()),
+            InlineKeyboardButton(text='🔎 Потеряшка', callback_data=Postination(action='lost').pack()),
+            InlineKeyboardButton(text='✏️ Без тега', callback_data=Postination(action='tagless').pack()),
+            
+            width=1
+        )
+    else:
+        builder.row(
+            InlineKeyboardButton(text='📸 Найди меня', callback_data=Postination(action='find').pack()),
+            InlineKeyboardButton(text='🔎 Потеряшка', callback_data=Postination(action='lost').pack()),
+            InlineKeyboardButton(text='✏️ Без тега', callback_data=Postination(action='tagless').pack()),
+            
+            width=1
+        )
     return builder.as_markup()
